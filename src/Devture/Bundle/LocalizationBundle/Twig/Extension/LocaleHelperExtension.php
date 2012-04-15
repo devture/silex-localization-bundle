@@ -1,17 +1,18 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle\Twig\Extension;
 use Symfony\Component\HttpFoundation\Request;
+use Devture\Bundle\LocalizationBundle\Routing\LocaleAwareUrlGenerator;
 
 class LocaleHelperExtension extends \Twig_Extension {
 
     private $request;
-    private $urlGenerator;
+    private $generator;
     private $currentLocale;
     private $locales;
 
-    public function __construct(Request $request, $urlGenerator, $currentLocale, array $locales) {
+    public function __construct(Request $request, LocaleAwareUrlGenerator $generator, $currentLocale, array $locales) {
         $this->request = $request;
-        $this->urlGenerator = $urlGenerator;
+        $this->generator = $generator;
         $this->currentLocale = $currentLocale;
         $this->locales = $locales;
     }
@@ -53,13 +54,11 @@ class LocaleHelperExtension extends \Twig_Extension {
     }
 
     public function getLocalizedPath($endpoint, array $args = array()) {
-        $args['locale'] = $this->currentLocale;
-        return $this->urlGenerator->generate($endpoint, $args);
+        return $this->generator->generate($endpoint, $args);
     }
 
     public function getLocalizedUrl($endpoint, array $args = array()) {
-        $args['locale'] = $this->currentLocale;
-        return $this->urlGenerator->generate($endpoint, $args, true);
+        return $this->generator->generate($endpoint, $args, true);
     }
 
 }

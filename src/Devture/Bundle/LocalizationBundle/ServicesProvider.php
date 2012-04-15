@@ -21,6 +21,10 @@ class ServicesProvider implements ServiceProviderInterface {
         $app['default_locale'] = $config['default_locale'];
         $app['locales'] = $config['locales'];
 
+        $app['url_generator_localized'] = $app->share(function () use ($app) {
+            return new \Devture\Bundle\LocalizationBundle\Routing\LocaleAwareUrlGenerator($app, $app['routes'], $app['request_context']);
+        });
+
         $app->register(new \Silex\Provider\TranslationServiceProvider(), array(
                 'locale_fallback' => $config['fallback_locale'],));
 
@@ -46,7 +50,7 @@ class ServicesProvider implements ServiceProviderInterface {
             }
 
             $app['translator']->setLocale($app['locale']);
-            $app['twig']->addExtension(new LocaleHelperExtension($app['request'], $app['url_generator'], $app['locale'], $config['locales']));
+            $app['twig']->addExtension(new LocaleHelperExtension($app['request'], $app['url_generator_localized'], $app['locale'], $config['locales']));
 
             if ($isInvalidLocale) {
                 return $app->abort(404);
