@@ -37,6 +37,8 @@ class ServicesProvider implements ServiceProviderInterface {
         }
         $app['translator.messages'] = $messagesMap;
 
+        $app['twig']->addExtension(new \Symfony\Bridge\Twig\Extension\TranslationExtension($app['translator']));
+
         $app->before(function () use ($app, $config) {
             $app['locale'] = $config['default_locale'];
 
