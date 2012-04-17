@@ -2,16 +2,17 @@
 namespace Devture\Bundle\LocalizationBundle;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\MessageSelector;
+use Devture\Bundle\LocalizationBundle\Translation\JsonFileLoader;
 use Devture\Bundle\LocalizationBundle\Twig\Extension\LocaleHelperExtension;
 
 class ServicesProvider implements ServiceProviderInterface {
 
     private $config;
-    private $basePath;
 
-    public function __construct(array $config, $basePath) {
+    public function __construct(array $config) {
         $this->config = $config;
-        $this->basePath = $basePath;
     }
 
     public function register(Application $app) {
@@ -19,23 +20,33 @@ class ServicesProvider implements ServiceProviderInterface {
 
         //Expose some settings
         $app['default_locale'] = $config['default_locale'];
+        $app['fallback_locale'] = $config['fallback_locale'];
         $app['locales'] = $config['locales'];
 
         $app['url_generator_localized'] = $app->share(function () use ($app) {
             return new \Devture\Bundle\LocalizationBundle\Routing\LocaleAwareUrlGenerator($app, $app['routes'], $app['request_context']);
         });
 
-        $app->register(new \Silex\Provider\TranslationServiceProvider(), array(
-                'locale_fallback' => $config['fallback_locale'],));
+        $app['translator'] = $app->share(function () use ($app) {
+            $translator = new Translator(isset($app['locale']) ? $app['locale'] : 'en', $app['translator.message_selector']);
+            if (isset($app['fallback_locale'])) {
+                $translator->setFallbackLocale($app['fallback_locale']);
+            }
+            $translator->addLoader('json', $app['localization.translator.loader']);
+            return $translator;
+        });
 
-        //Load translation messages from JSON files (see the 'translator.messages' service definiton)
-        $app['translator.loader'] = new \Devture\Bundle\LocalizationBundle\Translation\JsonFileLoader();
+        $app['translator.message_selector'] = $app->share(function () {
+            return new MessageSelector();
+        });
 
-        $messagesMap = array();
-        foreach ($config['locales'] as $key => $data) {
-            $messagesMap[$key] = $this->basePath . '/locales/' . $key . '.json';
-        }
-        $app['translator.messages'] = $messagesMap;
+        $app['localization.translator.resource_loader'] = $app->share(function () use ($app) {
+            return new \Devture\Bundle\LocalizationBundle\Translation\ResourceLoader($app['translator'], 'json');
+        });
+
+        $app['localization.translator.loader'] = $app->share(function () {
+            return new JsonFileLoader();
+        });
 
         $app['twig']->addExtension(new \Symfony\Bridge\Twig\Extension\TranslationExtension($app['translator']));
 
