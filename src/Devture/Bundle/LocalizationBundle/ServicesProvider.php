@@ -53,10 +53,10 @@ class ServicesProvider implements ServiceProviderInterface {
         $app->before(function () use ($app, $config) {
             $app['locale'] = $config['default_locale'];
 
-            $isInvalidLocale = false;
-            if ($locale = $app['request']->get('locale')) {
+            $isAcceptableLocale = true;
+            if ($locale = $app['request']->attributes->get('locale')) {
                 if (!in_array($locale, array_keys($config['locales']))) {
-                    $isInvalidLocale = true;
+                    $isAcceptableLocale = false;
                 } else {
                     $app['locale'] = $locale;
                 }
@@ -65,7 +65,7 @@ class ServicesProvider implements ServiceProviderInterface {
             $app['translator']->setLocale($app['locale']);
             $app['twig']->addExtension(new LocaleHelperExtension($app['request'], $app['url_generator_localized'], $app['locale'], $config['locales']));
 
-            if ($isInvalidLocale) {
+            if (!$isAcceptableLocale) {
                 return $app->abort(404);
             }
         });
