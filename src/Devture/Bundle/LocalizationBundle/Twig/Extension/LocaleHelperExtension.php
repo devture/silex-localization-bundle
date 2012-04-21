@@ -48,9 +48,13 @@ class LocaleHelperExtension extends \Twig_Extension {
         return str_replace($this->currentLocale, $newLocale, $uri);
     }
 
-    public function getTranslated($object, $attribute) {
+    public function getTranslated($object, $attribute, $fallbackValue = null) {
         $getter = 'get' . ucfirst($attribute);
-        return $object->$getter($this->currentLocale);
+        $value = $object->$getter($this->currentLocale);
+        if ($value === null || $value === '') {
+            return $fallbackValue;
+        }
+        return $value;
     }
 
     public function getLocalizedPath($endpoint, array $args = array()) {
