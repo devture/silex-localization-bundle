@@ -50,6 +50,9 @@ class LocaleHelperExtension extends \Twig_Extension {
 
     public function getTranslated($object, $attribute, $fallbackValue = null) {
         $getter = 'get' . ucfirst($attribute);
+        if (!method_exists($object, $getter)) {
+            throw new \InvalidArgumentException('Trying to get translated attribute via missing getter method ' . get_class($object) . '::' . $getter);
+        }
         $value = $object->$getter($this->currentLocale);
         if ($value === null || $value === '') {
             return $fallbackValue;
