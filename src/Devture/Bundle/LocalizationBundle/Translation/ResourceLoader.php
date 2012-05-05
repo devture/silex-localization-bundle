@@ -12,12 +12,15 @@ class ResourceLoader {
         $this->format = $format;
     }
 
-    public function addResources($path) {
+    public function addResources($path, $loaderName = null) {
+        if ($loaderName === null) {
+            $loaderName = $this->format;
+        }
         $path = rtrim($path, '/');
         foreach (glob($path . '/*.' . $this->format) as $filePath) {
             $parts = explode('/', $filePath);
             list($localeKey, $_extension) = explode('.', array_pop($parts));
-            $this->translator->addResource($this->format, $filePath, $localeKey);
+            $this->translator->addResource($loaderName, $filePath, $localeKey);
         }
     }
 
