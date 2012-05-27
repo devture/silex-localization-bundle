@@ -47,6 +47,10 @@ class ServicesProvider implements ServiceProviderInterface {
         $app['localization.translator.loader'] = $app->share(function () {
             return new JsonFileLoader();
         });
+    }
+
+    public function boot(Application $app) {
+        $config = $this->config;
 
         $app['twig']->addExtension(new \Symfony\Bridge\Twig\Extension\TranslationExtension($app['translator']));
 
