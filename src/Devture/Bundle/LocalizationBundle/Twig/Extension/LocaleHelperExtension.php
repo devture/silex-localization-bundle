@@ -45,7 +45,7 @@ class LocaleHelperExtension extends \Twig_Extension {
         if ($uri === '/') {
             return '/' . $newLocale;
         }
-        return str_replace($this->currentLocale, $newLocale, $uri);
+        return preg_replace("/\/" . preg_quote($this->currentLocale) . "(\/|$)/", "/" . preg_quote($newLocale) . "$1", $uri);
     }
 
     public function getTranslated($object, $attribute, $fallbackValue = null) {
