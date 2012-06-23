@@ -16,6 +16,6 @@ class LocaleAwareUrlGenerator extends UrlGenerator {
     public function generate($name, $parameters = array(), $absolute = false) {
         $parameters['locale'] = $this->container['locale'];
         return parent::generate($name, $parameters, $absolute);
-	}
+    }
 
 }
