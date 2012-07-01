@@ -6,6 +6,7 @@ use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\MessageSelector;
 use Devture\Bundle\LocalizationBundle\Translation\JsonFileLoader;
 use Devture\Bundle\LocalizationBundle\Twig\Extension\LocaleHelperExtension;
+use Devture\Bundle\LocalizationBundle\EventListener\LocaleListener;
 
 class ServicesProvider implements ServiceProviderInterface {
 
@@ -28,7 +29,7 @@ class ServicesProvider implements ServiceProviderInterface {
         });
 
         $app['translator'] = $app->share(function () use ($app) {
-            $translator = new Translator(isset($app['locale']) ? $app['locale'] : 'en', $app['translator.message_selector']);
+            $translator = new Translator('en', $app['translator.message_selector']);
             if (isset($app['fallback_locale'])) {
                 $translator->setFallbackLocale($app['fallback_locale']);
             }
@@ -52,27 +53,10 @@ class ServicesProvider implements ServiceProviderInterface {
     public function boot(Application $app) {
         $config = $this->config;
 
+        $app['dispatcher']->addSubscriber(new LocaleListener($config['default_locale'], array_keys($config['locales']), $app['translator']));
+
         $app['twig']->addExtension(new \Symfony\Bridge\Twig\Extension\TranslationExtension($app['translator']));
-
-        $app->before(function () use ($app, $config) {
-            $app['locale'] = $config['default_locale'];
-
-            $isAcceptableLocale = true;
-            if ($locale = $app['request']->attributes->get('locale')) {
-                if (!in_array($locale, array_keys($config['locales']))) {
-                    $isAcceptableLocale = false;
-                } else {
-                    $app['locale'] = $locale;
-                }
-            }
-
-            $app['translator']->setLocale($app['locale']);
-            $app['twig']->addExtension(new LocaleHelperExtension($app['request'], $app['url_generator_localized'], $app['locale'], $config['locales']));
-
-            if (!$isAcceptableLocale) {
-                return $app->abort(404);
-            }
-        });
+        $app['twig']->addExtension(new LocaleHelperExtension($app, $config['locales']));
     }
 
 }
