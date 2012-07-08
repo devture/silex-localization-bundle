@@ -57,7 +57,7 @@ class LocaleHelperExtension extends \Twig_Extension {
     }
 
     public function getLocalizedUrl($endpoint, array $args = array()) {
-        return $this->generator->generate($endpoint, $args, true);
+        return $this->container['url_generator_localized']->generate($endpoint, $args, true);
     }
 
 }
