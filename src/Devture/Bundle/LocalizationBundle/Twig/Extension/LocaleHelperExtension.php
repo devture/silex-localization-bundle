@@ -1,5 +1,6 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle\Twig\Extension;
+
 class LocaleHelperExtension extends \Twig_Extension {
 
     private $container;

@@ -1,5 +1,6 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle\EventListener;
+
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -43,4 +44,5 @@ class LocaleListener implements EventSubscriberInterface {
     static public function getSubscribedEvents() {
         return array(KernelEvents::REQUEST => array(array('onKernelRequest')),);
     }
+
 }

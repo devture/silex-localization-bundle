@@ -1,5 +1,6 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle\Translation;
+
 use Symfony\Component\Translation\Loader\ArrayLoader;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;

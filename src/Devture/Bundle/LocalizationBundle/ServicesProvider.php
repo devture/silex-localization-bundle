@@ -1,5 +1,6 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle;
+
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\Translation\Translator;

@@ -1,5 +1,6 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle\Translation;
+
 use Symfony\Component\Translation\Translator;
 
 class ResourceLoader {
