@@ -12,7 +12,7 @@ class LocaleHelperExtension extends \Twig_Extension {
 	}
 
 	public function getName() {
-		return 'locale_helper_extension';
+		return 'devture_localization_locale_helper_extension';
 	}
 
 	public function getFunctions() {
