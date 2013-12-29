@@ -1,6 +1,9 @@
 {
 	"name": "devture/silex-localization-bundle",
+	"type": "library",
 	"description": "Silex bundle that helps with localization.",
+	"keywords": ["silex", "bundle", "localization"],
+	"license": "BSD",
 	"authors": [
 		{
 			"name": "Slavi Pantaleev",
