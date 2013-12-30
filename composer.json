@@ -12,6 +12,7 @@
 	],
 	"require": {
 		"silex/silex": ">=1.0,<1.2",
+		"twig/twig": ">=1.8.0,<2.0-dev",
 		"devture/form": ">=1.0,<1.1"
 	},
 	"autoload": {
