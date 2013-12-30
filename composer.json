@@ -1,22 +1,22 @@
 {
-    "name": "devture/silex-framework-bundle",
-    "type": "library",
-    "description": "A Silex 'bundle' initializing the environment and hooking up a few base components",
-    "keywords": ["silex", "bundle"],
-    "license": "BSD",
-    "authors": [
-        {
-            "name": "Slavi Pantaleev",
-            "email": "s.pantaleev@gmail.com"
-        }
-    ],
-    "require": {
-        "silex/silex": ">=1.0,<1.2",
-        "devture/form": ">=1.0,<1.1"
-    },
-    "autoload": {
-        "psr-0": {
-            "Devture\\Bundle\\FrameworkBundle\\": "src/"
-        }
-    }
+	"name": "devture/silex-framework-bundle",
+	"type": "library",
+	"description": "Silex bundle initializing the environment and hooking up a few base components",
+	"keywords": ["silex", "bundle"],
+	"license": "BSD",
+	"authors": [
+		{
+			"name": "Slavi Pantaleev",
+			"email": "s.pantaleev@gmail.com"
+		}
+	],
+	"require": {
+		"silex/silex": ">=1.0,<1.2",
+		"devture/form": ">=1.0,<1.1"
+	},
+	"autoload": {
+		"psr-0": {
+			"Devture\\Bundle\\FrameworkBundle\\": "src/"
+		}
+	}
 }
