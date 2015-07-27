@@ -19,7 +19,7 @@ class LocaleAwareUrlGenerator extends UrlGenerator {
 	public function generate($name, $parameters = array(), $absolute = false) {
 		$route = $this->routes->get($name);
 		if ($route instanceof Route) {
-			if (strpos($route->getPath(), '{locale}') !== false) {
+			if (strpos($route->getPath(), '{locale}') !== false && !array_key_exists('locale', $parameters)) {
 				try {
 					$parameters['locale'] = $this->getRequest()->getLocale();
 				} catch (\RuntimeException $e) {
