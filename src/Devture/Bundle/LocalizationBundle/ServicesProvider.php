@@ -54,7 +54,7 @@ class ServicesProvider implements ServiceProviderInterface {
 		$app['devture_localization.translator'] = $app->share(function ($app) {
 			$translator = new Translator('en', $app['devture_localization.translator.message_selector']);
 			if (isset($app['fallback_locale'])) {
-				$translator->setFallbackLocale($app['fallback_locale']);
+				$translator->setFallbackLocales(array($app['fallback_locale']));
 			}
 			$translator->addLoader('json', $app['devture_localization.translator.loader']);
 			return $translator;
