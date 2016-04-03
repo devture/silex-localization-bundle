@@ -21,6 +21,7 @@ class ResourceLoader {
 		foreach (glob($path . '/*.' . $this->format) as $filePath) {
 			$parts = explode('/', $filePath);
 			list($localeKey, $_extension) = explode('.', array_pop($parts));
+
 			$this->translator->addResource($loaderName, $filePath, $localeKey);
 		}
 	}

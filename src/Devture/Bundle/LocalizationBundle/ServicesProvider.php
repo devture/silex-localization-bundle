@@ -16,6 +16,8 @@ class ServicesProvider implements ServiceProviderInterface {
 			'default_locale' => 'en',
 			'fallback_locale' => 'en',
 			'locales' => array('en' => 'English'),
+			'cache_path' => null,
+			'auto_reload' => false,
 		), $config);
 	}
 
@@ -50,9 +52,13 @@ class ServicesProvider implements ServiceProviderInterface {
 				$app['devture_localization.translator']
 			);
 		});
-
-		$app['devture_localization.translator'] = $app->share(function ($app) {
-			$translator = new Translator('en', $app['devture_localization.translator.message_selector']);
+		$app['devture_localization.translator'] = $app->share(function ($app) use ($config) {
+			$translator = new Translator(
+				'en',
+				$app['devture_localization.translator.message_selector'],
+				$config['cache_path'],
+				$config['auto_reload']
+			);
 			if (isset($app['fallback_locale'])) {
 				$translator->setFallbackLocales(array($app['fallback_locale']));
 			}
