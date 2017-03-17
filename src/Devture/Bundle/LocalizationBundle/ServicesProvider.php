@@ -1,13 +1,11 @@
 <?php
 namespace Devture\Bundle\LocalizationBundle;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\MessageSelector;
-use Symfony\Bridge\Twig\Extension\TranslationExtension;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class ServicesProvider implements ServiceProviderInterface {
+class ServicesProvider implements \Pimple\ServiceProviderInterface, \Silex\Api\BootableProviderInterface, \Silex\Api\EventListenerProviderInterface {
 
 	private $config;
 
@@ -21,19 +19,19 @@ class ServicesProvider implements ServiceProviderInterface {
 		), $config);
 	}
 
-	public function register(Application $app) {
+	public function register(\Pimple\Container $container) {
 		$config = $this->config;
 
 		//Expose some settings
-		$app['default_locale'] = $config['default_locale'];
-		$app['fallback_locale'] = $config['fallback_locale'];
-		$app['locales'] = $config['locales'];
+		$container['default_locale'] = $config['default_locale'];
+		$container['fallback_locale'] = $config['fallback_locale'];
+		$container['locales'] = $config['locales'];
 
-		$app['devture_localization.url_generator'] = $app->share(function ($app) {
-			return new Routing\LocaleAwareUrlGenerator($app, $app['routes'], $app['request_context']);
-		});
+		$container['devture_localization.url_generator'] = function ($container) {
+			return new Routing\LocaleAwareUrlGenerator($container, $container['routes'], $container['request_context']);
+		};
 
-		if (!isset($app['url_generator'])) {
+		if (!isset($container['url_generator'])) {
 			//Technically, we don't need either of those.
 			//But registering as `url_generator` directly will fail if one of them overwrites it later.
 			//Most projects will include one of them anyway, so this ordering requirement shouldn't be a big deal.
@@ -41,62 +39,66 @@ class ServicesProvider implements ServiceProviderInterface {
 		}
 
 		//Replace the url_generator with our own, to enable transparent locale-aware URL generation
-		$app->extend('url_generator', function ($current) use ($app) {
-			return $app['devture_localization.url_generator'];
+		$container->extend('url_generator', function ($_current, $container) {
+			return $container['devture_localization.url_generator'];
 		});
 
-		$app['devture_localization.locale_listener'] = $app->share(function ($app) use ($config) {
+		$container['devture_localization.locale_listener'] = function ($container) use ($config) {
 			return new EventListener\LocaleListener(
 				$config['default_locale'],
 				array_keys($config['locales']),
-				$app['devture_localization.translator']
+				$container['devture_localization.translator']
 			);
-		});
-		$app['devture_localization.translator'] = $app->share(function ($app) use ($config) {
+		};
+
+		$container['devture_localization.translator'] = function ($container) use ($config) {
 			$translator = new Translator(
 				'en',
-				$app['devture_localization.translator.message_selector'],
+				$container['devture_localization.translator.message_selector'],
 				$config['cache_path'],
 				$config['auto_reload']
 			);
-			if (isset($app['fallback_locale'])) {
-				$translator->setFallbackLocales(array($app['fallback_locale']));
+			if (isset($container['fallback_locale'])) {
+				$translator->setFallbackLocales(array($container['fallback_locale']));
 			}
-			$translator->addLoader('json', $app['devture_localization.translator.loader']);
+			$translator->addLoader('json', $container['devture_localization.translator.loader']);
 			return $translator;
-		});
+		};
 
-		//Alias it, so services that rely on $app['translator'] (like devture/form's FormExtension) can work.
-		//Silex\Provider\TranslationServiceProvider also exports $app['translator'], so this makes us compatible.
-		$app['translator'] = $app->share(function ($app) {
-			return $app['devture_localization.translator'];
-		});
+		//Alias it, so services that rely on $container['translator'] (like devture/form's FormExtension) can work.
+		//Silex\Provider\TranslationServiceProvider also exports $container['translator'], so this makes us compatible.
+		//
+		//Also, if TwigServiceProvider sees that there's a `translator` service, it would automatically
+		//register \Symfony\Bridge\Twig\Extension\TranslationExtension.
+		$container['translator'] = function ($container) {
+			return $container['devture_localization.translator'];
+		};
 
-		$app['devture_localization.translator.message_selector'] = $app->share(function () {
+		$container['devture_localization.translator.message_selector'] = function () {
 			return new MessageSelector();
-		});
+		};
 
-		$app['devture_localization.translator.resource_loader'] = $app->share(function ($app) {
-			return new Translation\ResourceLoader($app['devture_localization.translator'], 'json');
-		});
+		$container['devture_localization.translator.resource_loader'] = function ($container) {
+			return new Translation\ResourceLoader($container['devture_localization.translator'], 'json');
+		};
 
-		$app['devture_localization.translator.loader'] = $app->share(function () {
+		$container['devture_localization.translator.loader'] = function () {
 			return new Translation\JsonFileLoader();
-		});
+		};
 
-		$app['devture_localization.twig.translation_extension'] = $app->share(function ($app) {
-			return new TranslationExtension($app['devture_localization.translator']);
-		});
-
-		$app['devture_localization.twig.locale_helper_extension'] = $app->share(function ($app) use ($config) {
-			return new Twig\LocaleHelperExtension($app, $config['locales']);
-		});
+		$container['devture_localization.twig.locale_helper_extension'] = function ($container) use ($config) {
+			return new Twig\LocaleHelperExtension($container, $config['locales']);
+		};
 	}
 
-	public function boot(Application $app) {
-		$app['dispatcher']->addSubscriber($app['devture_localization.locale_listener']);
+	public function subscribe(\Pimple\Container $container, EventDispatcherInterface $dispatcher) {
+		$dispatcher->addSubscriber($container['devture_localization.locale_listener']);
+	}
 
-		$app['twig']->addExtension($app['devture_localization.twig.translation_extension']);
+	public function boot(\Silex\Application $app) {
+		//Note: \Symfony\Bridge\Twig\Extension\TranslationExtension is automatically registered
+		//by TwigServiceProvider, because we have defined a `translator` service above.
+
 		$app['twig']->addExtension($app['devture_localization.twig.locale_helper_extension']);
 	}
 

@@ -11,7 +11,7 @@ class LocaleAwareUrlGenerator extends UrlGenerator {
 
 	private $container;
 
-	public function __construct(\Pimple $container, RouteCollection $routes, RequestContext $context) {
+	public function __construct(\Pimple\Container $container, RouteCollection $routes, RequestContext $context) {
 		$this->container = $container;
 		$this->routes = $routes;
 		parent::__construct($routes, $context);
@@ -67,11 +67,22 @@ class LocaleAwareUrlGenerator extends UrlGenerator {
 	}
 
 	/**
-	 * @throws \RuntimeException when not in a request context
+	 * @throws \LogicException when not in a request context
 	 * @return \Symfony\Component\HttpFoundation\Request
 	 */
 	private function getRequest() {
-		return $this->container['request'];
+		$request = $this->getRequestStack()->getCurrentRequest();
+		if ($request === null) {
+			throw new \LogicException('Trying to get request, but not in a request context.');
+		}
+		return $request;
+	}
+
+	/**
+	 * @return \Symfony\Component\HttpFoundation\RequestStack
+	 */
+	private function getRequestStack() {
+		return $this->container['request_stack'];
 	}
 
 }

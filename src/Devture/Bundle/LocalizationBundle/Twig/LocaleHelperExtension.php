@@ -6,7 +6,7 @@ class LocaleHelperExtension extends \Twig_Extension {
 	private $container;
 	private $locales;
 
-	public function __construct(\Pimple $container, array $locales) {
+	public function __construct(\Pimple\Container $container, array $locales) {
 		$this->container = $container;
 		$this->locales = $locales;
 	}
@@ -17,11 +17,11 @@ class LocaleHelperExtension extends \Twig_Extension {
 
 	public function getFunctions() {
 		return array(
-			'get_locale' => new \Twig_Function_Method($this, 'getLocale'),
-			'get_locales' => new \Twig_Function_Method($this, 'getLocales'),
-			'get_localized_uri' => new \Twig_Function_Method($this, 'getLocalizedUri'),
-			'get_translated' => new \Twig_Function_Method($this, 'getTranslated'),
-			'get_translated_or_first' => new \Twig_Function_Method($this, 'getTranslatedOrFirst'),
+			 new \Twig_SimpleFunction('get_locale', array($this, 'getLocale')),
+			 new \Twig_SimpleFunction('get_locales', array($this, 'getLocales')),
+			 new \Twig_SimpleFunction('get_localized_uri', array($this, 'getLocalizedUri')),
+			 new \Twig_SimpleFunction('get_translated', array($this, 'getTranslated')),
+			 new \Twig_SimpleFunction('get_translated_or_first', array($this, 'getTranslatedOrFirst')),
 		);
 	}
 
@@ -108,11 +108,22 @@ class LocaleHelperExtension extends \Twig_Extension {
 	}
 
 	/**
-	 * @throws \RuntimeException when not in a request context
+	 * @throws \LogicException when not in a request context
 	 * @return \Symfony\Component\HttpFoundation\Request
 	 */
 	private function getRequest() {
-		return $this->container['request'];
+		$request = $this->getRequestStack()->getCurrentRequest();
+		if ($request === null) {
+			throw new \LogicException('Trying to get request, but not in a request context.');
+		}
+		return $request;
+	}
+
+	/**
+	 * @return \Symfony\Component\HttpFoundation\RequestStack
+	 */
+	private function getRequestStack() {
+		return $this->container['request_stack'];
 	}
 
 }
