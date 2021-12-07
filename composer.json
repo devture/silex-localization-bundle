@@ -3,18 +3,18 @@
 	"type": "library",
 	"description": "Silex bundle that helps with localization.",
 	"keywords": ["silex", "bundle", "localization"],
-	"license": "BSD",
+	"license": "BSD-3-Clause",
 	"authors": [
 		{
 			"name": "Slavi Pantaleev",
-			"email": "s.pantaleev@gmail.com"
+			"email": "slavi@devture.com"
 		}
 	],
 	"require": {
 		"silex/silex": "^2.0",
-		"symfony/config": "^3.0",
+		"symfony/config": "^3.0|^4.0|^5.0",
 		"symfony/translation": "^3.0",
-		"symfony/twig-bridge": "^3.0"
+		"symfony/twig-bridge": "^3.0|^4.0"
 	},
 	"autoload": {
 		"psr-0": {
